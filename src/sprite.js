@@ -9,7 +9,6 @@ export default function Sprite({canvas, context, attributes, enemy}) {
   let keys = {left: false, right: false, up: false, down: false}
   let lastDirection = 'right'
   let {
-    id,
     position,
     velocity,
     speed,
