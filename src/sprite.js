@@ -136,7 +136,6 @@ export default function Sprite({canvas, context, attributes, enemy}) {
       attack.isAttacking = true
 
       setTimeout(() => {
-        console.log('klaar gemoer')
         attack.isAttacking = false
       }, attack.duration)
     },
