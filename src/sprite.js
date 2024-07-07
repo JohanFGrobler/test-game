@@ -7,7 +7,9 @@ export default function Sprite({canvas, context, attributes, enemy}) {
   let isJumping = false
   let jumpCount = 0
   let keys = {left: false, right: false, up: false, down: false}
+  let lastDirection = 'right'
   let {
+    id,
     position,
     velocity,
     speed,
@@ -30,8 +32,10 @@ export default function Sprite({canvas, context, attributes, enemy}) {
     // Horizontal movement
     if (keys.left && !keys.right) {
       acceleration.x = -characterAcceleration
+      lastDirection = 'left'
     } else if (keys.right && !keys.left) {
       acceleration.x = characterAcceleration
+      lastDirection = 'right'
     } else {
       acceleration.x = 0
     }
@@ -87,25 +91,44 @@ export default function Sprite({canvas, context, attributes, enemy}) {
       position.y = 0
       velocity.y = 0
     }
-
-    // Update attack box position
-    attack.attackBox.position = position
-
-    detectAttackCollision()
   }
 
-  function detectAttackCollision() {
-    if (!enemy) return;
+  function updateAttackBoxPosition() {
+    function attackLeft (){
+      attack.attackBox.position = {x: position.x - width, y: position.y}
+    }
 
-    const xIntersect = attack.attackBox.position.x + attack.attackBox.size.width >= enemy.attributes.position.x
-      && attack.attackBox.position.x <= enemy.attributes.position.x  + enemy.attributes.size.width
-    const yIntersect = attack.attackBox.position.y + attack.attackBox.size.height >= enemy.attributes.position.y
-      && attack.attackBox.position.y <= enemy.attributes.position.y  + enemy.attributes.size.height
+    function attackRight (){
+      attack.attackBox.position = {x: position.x + width, y: position.y}
+    }
+
+    if (keys.left && !keys.right) {
+      attackLeft()
+    } else if (keys.right && !keys.left) {
+      attackRight()
+    } else if (lastDirection){
+      switch (lastDirection){
+        case 'left': attackLeft()
+          break;
+        case 'right': attackRight()
+          break;
+      }
+    }
+  }
+
+  function detectAttack({rectangle1, rectangle2}) {
+    if (!rectangle2) return
+
+    const xIntersect = rectangle1.attack.attackBox.position.x + rectangle1.attack.attackBox.size.width >= rectangle2.attributes.position.x
+      && rectangle1.attack.attackBox.position.x <= rectangle2.attributes.position.x + rectangle2.attributes.size.width
+    const yIntersect = rectangle1.attack.attackBox.position.y + rectangle1.attack.attackBox.size.height >= rectangle2.attributes.position.y
+      && rectangle1.attack.attackBox.position.y <= rectangle2.attributes.position.y + rectangle2.attributes.size.height
 
     const isAttackCollision = xIntersect && yIntersect && attack.isAttacking
 
     if (isAttackCollision) {
-       console.log('eina!')
+      attack.isAttacking = false
+      console.log('eina!')
     }
   }
 
@@ -118,16 +141,21 @@ export default function Sprite({canvas, context, attributes, enemy}) {
       context.fillRect(position.x, position.y, width, height)
 
       //Attack body
-      context.fillStyle = 'blue'
-      context.fillRect(
-        attack.attackBox.position.x,
-        attack.attackBox.position.y,
-        attack.attackBox.size.width,
-        attack.attackBox.size.height
-      )
+      if (attack.isAttacking) {
+        context.fillStyle = 'blue'
+        context.fillRect(
+          attack.attackBox.position.x,
+          attack.attackBox.position.y,
+          attack.attackBox.size.width,
+          attack.attackBox.size.height
+        )
+      }
+
     },
     update() {
       this.draw()
+      updateAttackBoxPosition()
+      detectAttack({rectangle1: this.attributes, rectangle2: this.enemy})
       jump()
       updatePosition()
     },

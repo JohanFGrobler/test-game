@@ -8,6 +8,7 @@ export function PlayerAttributes() {
   }
 
   return {
+    id: 'player',
     position: defaults.position,
     velocity: {
       x: 0,
@@ -19,13 +20,15 @@ export function PlayerAttributes() {
     },
     attack: {
       attackBox: {
-        position: defaults.position,
+        position: {
+          x: defaults.position.x + defaults.size.width
+        },
         size: defaults.size
       },
       duration: 100, // time in ms
       isAttacking: false
     },
-    characterAcceleration: 0.3,
+    characterAcceleration: 0.2,
     jumpForce: 10,
     weight: 70,
     size: defaults.size,
@@ -36,13 +39,14 @@ export function PlayerAttributes() {
 export function EnemyAttributes() {
   const defaults = {
     position: {
-      x: 250,
+      x: 500,
       y: 0
     },
     size: {width: 50, height: 50}
   }
 
   return {
+    id: 'enemy',
     position: defaults.position,
     velocity: {
       x: 0,
@@ -54,13 +58,15 @@ export function EnemyAttributes() {
     },
     attack: {
       attackBox: {
-        position: defaults.position,
+        position: {
+          x: defaults.position.x + defaults.size.width
+        },
         size: defaults.size
       },
       duration: 100, // time in ms
       isAttacking: false
     },
-    characterAcceleration: 0.3,
+    characterAcceleration: 0.2,
     jumpForce: 10,
     weight: 70,
     size: defaults.size,

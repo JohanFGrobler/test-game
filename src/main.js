@@ -6,11 +6,14 @@ document.addEventListener('DOMContentLoaded', () => {
   const canvas = document.querySelector('canvas')
   const context = canvas.getContext('2d')
 
+  // Temp
+  let direction
+
   // Sprites
   const enemy = Sprite({
     canvas,
     context,
-    attributes: EnemyAttributes(),
+    attributes: EnemyAttributes()
   })
   const player = Sprite({
     canvas,
@@ -49,6 +52,8 @@ document.addEventListener('DOMContentLoaded', () => {
         display: block;
       }
     `
+
+    // cursor: none;
     document.head.appendChild(style)
   }
 
@@ -75,6 +80,7 @@ document.addEventListener('DOMContentLoaded', () => {
     context.fillStyle = 'black'
     context.fillRect(0, 0, canvas.width, canvas.height)
 
+    enemy.enemy = player
     player.update()
     enemy.update()
 
@@ -100,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         player.move('down', true)
         break
       case ' ':
-        player.attack()
+        // Dash
         break
     }
   }
@@ -126,13 +132,34 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  function handleMouseDown(event) {
+    if (!event) return
+
+    player.attack()
+  }
+
   // Do stuff
   init()
   resizeCanvas()
   animate()
 
+
+  setInterval(() => {
+    enemy.attack()
+  }, 3000)
+
+  // setInterval(() => {
+  //   enemy.move(direction, true)
+  //
+  //   setTimeout(() => {
+  //     enemy.move(direction, false)
+  //     direction = direction === 'left' ? 'right' : 'left'
+  //   }, 200)
+  // }, 1000)
+
   // Event listeners
   window.addEventListener('resize', resizeCanvas)
   window.addEventListener('keydown', handleKeyDown)
+  window.addEventListener('mousedown', handleMouseDown)
   window.addEventListener('keyup', handleKeyUp)
 })
