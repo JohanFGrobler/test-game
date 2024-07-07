@@ -1,26 +1,37 @@
-import Physics from './physics.js'
+import {Physics} from './physics.js'
 
-export default function Sprite({canvas, context, position, velocity, size, color}) {
-  // Constants
-  const {gravity, playerAttributes, friction} = Physics()
-  const height = size?.height ?? 50
-  const width = size?.width ?? 50
-  const terminalVelocity = playerAttributes.weight * gravity
-  const maxJumps = 2
-
+export default function Sprite({canvas, context, attributes, enemy}) {
   // Variables
   let acceleration = {x: 0, y: 0}
   let isStopping = false
   let isJumping = false
   let jumpCount = 0
   let keys = {left: false, right: false, up: false, down: false}
+  let {
+    position,
+    velocity,
+    speed,
+    characterAcceleration,
+    jumpForce,
+    weight,
+    size,
+    color,
+    attack
+  } = attributes
+
+  // Constants
+  const {gravity, friction} = Physics()
+  const height = size?.height ?? 50
+  const width = size?.width ?? 50
+  const terminalVelocity = weight * gravity
+  const maxJumps = 2
 
   function accelerate() {
     // Horizontal movement
     if (keys.left && !keys.right) {
-      acceleration.x = -playerAttributes.acceleration
+      acceleration.x = -characterAcceleration
     } else if (keys.right && !keys.left) {
-      acceleration.x = playerAttributes.acceleration
+      acceleration.x = characterAcceleration
     } else {
       acceleration.x = 0
     }
@@ -31,7 +42,7 @@ export default function Sprite({canvas, context, position, velocity, size, color
 
   function jump() {
     if (keys.up && !isJumping && jumpCount < maxJumps) {
-      velocity.y = -playerAttributes.jumpForce
+      velocity.y = -jumpForce
       jumpCount++
       isJumping = true
     }
@@ -47,7 +58,7 @@ export default function Sprite({canvas, context, position, velocity, size, color
     }
 
     // Cap horizontal velocity
-    velocity.x = Math.max(-playerAttributes.speed.max, Math.min(playerAttributes.speed.max, velocity.x))
+    velocity.x = Math.max(-speed.max, Math.min(speed.max, velocity.x))
 
     // Apply friction when stopping
     if (acceleration.x === 0) {
@@ -76,18 +87,58 @@ export default function Sprite({canvas, context, position, velocity, size, color
       position.y = 0
       velocity.y = 0
     }
+
+    // Update attack box position
+    attack.attackBox.position = position
+
+    detectAttackCollision()
+  }
+
+  function detectAttackCollision() {
+    if (!enemy) return;
+
+    const xIntersect = attack.attackBox.position.x + attack.attackBox.size.width >= enemy.attributes.position.x
+      && attack.attackBox.position.x <= enemy.attributes.position.x  + enemy.attributes.size.width
+    const yIntersect = attack.attackBox.position.y + attack.attackBox.size.height >= enemy.attributes.position.y
+      && attack.attackBox.position.y <= enemy.attributes.position.y  + enemy.attributes.size.height
+
+    const isAttackCollision = xIntersect && yIntersect && attack.isAttacking
+
+    if (isAttackCollision) {
+       console.log('eina!')
+    }
   }
 
   return {
-    velocity,
+    attributes,
+    enemy,
     draw() {
+      // Player body
       context.fillStyle = color ?? 'red'
       context.fillRect(position.x, position.y, width, height)
+
+      //Attack body
+      context.fillStyle = 'blue'
+      context.fillRect(
+        attack.attackBox.position.x,
+        attack.attackBox.position.y,
+        attack.attackBox.size.width,
+        attack.attackBox.size.height
+      )
     },
     update() {
       this.draw()
       jump()
       updatePosition()
+    },
+    attack() {
+      console.log('ek moer jou')
+      attack.isAttacking = true
+
+      setTimeout(() => {
+        console.log('klaar gemoer')
+        attack.isAttacking = false
+      }, attack.duration)
     },
     move(direction, isPressed = true) {
       keys[direction] = isPressed

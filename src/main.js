@@ -1,26 +1,22 @@
-import Physics from './physics.js'
 import Sprite from './sprite.js'
+import {EnemyAttributes, PlayerAttributes} from './attributes.js'
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Constants
   const canvas = document.querySelector('canvas')
   const context = canvas.getContext('2d')
 
   // Sprites
-  const player = Sprite({
-    canvas,
-    context,
-    position: { x: 0, y: 0 },
-    velocity: { x: 0, y: 0 },
-    size: { width: 50, height: 50 },
-    color: 'green'
-  })
   const enemy = Sprite({
     canvas,
     context,
-    position: { x: 250, y: 0 },
-    velocity: { x: 0, y: 0 },
-    size: { width: 50, height: 50 },
-    color: 'red'
+    attributes: EnemyAttributes(),
+  })
+  const player = Sprite({
+    canvas,
+    context,
+    attributes: PlayerAttributes(),
+    enemy
   })
 
   // Functions
@@ -102,6 +98,9 @@ document.addEventListener('DOMContentLoaded', () => {
       case 'ArrowDown':
       case 's':
         player.move('down', true)
+        break
+      case ' ':
+        player.attack()
         break
     }
   }
